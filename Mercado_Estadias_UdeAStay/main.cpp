@@ -21,3 +21,23 @@ public:
     }
 };
 
+// ---------------- Clase Usuario ----------------
+class Usuario {
+protected:
+    char documento[20];
+    int antiguedad;
+    float puntuacion;
+
+public:
+    Usuario() {}
+    Usuario(const char* doc, int ant, float punt) {
+        strcpy(documento, doc);
+        antiguedad = ant;
+        puntuacion = punt;
+    }
+
+    const char* getDocumento() { return documento; }
+    virtual void mostrarPerfil() {
+        cout << "Documento: " << documento << " | Antiguedad: " << antiguedad << " meses | Puntuacion: " << puntuacion << endl;
+    }
+};
