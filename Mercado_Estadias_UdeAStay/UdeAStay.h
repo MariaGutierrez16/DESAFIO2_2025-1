@@ -58,34 +58,21 @@ private:
     int cantidadReservas;
     int capacidadReservas;
 
-    void expandirCapacidad() {
-        int nuevaCapacidad = capacidadReservas * 2;
-        int* nuevoArreglo = new int[nuevaCapacidad];
-        for (int i = 0; i < cantidadReservas; ++i)
-            nuevoArreglo[i] = codigosReservas[i];
-        delete[] codigosReservas;
-        codigosReservas = nuevoArreglo;
-        capacidadReservas = nuevaCapacidad;
-    }
+    void expandirCapacidad();
 
 public:
-    Huesped() : cantidadReservas(0), capacidadReservas(10) {
-        codigosReservas = new int[capacidadReservas];
-    }
+    Huesped();
+    ~Huesped();
 
-    void agregarReserva(int codigo) {
-        if (cantidadReservas == capacidadReservas)
-            expandirCapacidad();
-        codigosReservas[cantidadReservas++] = codigo;
-    }
-    // ...
+    void agregarReserva(int codigo);
+    void mostrar() const override;
 };
 
 // Clase Anfitrión
 class Anfitrion : public Usuario {
 private:
     int cantidadAlojamientos;
-    char** codigosAlojamientos; // arreglo dinámico de cadenas
+    char** codigosAlojamientos;
 
 public:
     Anfitrion();
@@ -95,7 +82,7 @@ public:
 
     void agregarAlojamiento(const char* codigo);
     void eliminarAlojamiento(const char* codigo);
-    void mostrar() const;
+    void mostrar() const override;
 };
 
 // Clase Alojamiento
@@ -103,17 +90,15 @@ class Alojamiento {
 private:
     char codigo[10];
     char nombre[50];
-    char tipo[20];  // casa o apartamento
+    char tipo[20];
     char direccion[100];
     char municipio[50];
     char departamento[50];
     float precioNoche;
-    char amenidades[5][30]; // máx. 5 amenidades, 30 caracteres cada una
+    char amenidades[5][30];
     int cantidadAmenidades;
-
     char documentoAnfitrion[20];
-
-    Fecha* fechasReservadas[365]; // máximo 365 fechas reservadas (1 año)
+    Fecha* fechasReservadas[365];
 
 public:
     Alojamiento();
@@ -141,10 +126,10 @@ private:
     char documentoHuesped[20];
     Fecha fechaEntrada;
     int cantidadNoches;
-    char metodoPago[10]; // PSE o TCredito
+    char metodoPago[10];
     Fecha fechaPago;
     float monto;
-    char anotacion[1001]; // hasta 1000 caracteres + '\0'
+    char anotacion[1001];
 
 public:
     Reserva();
