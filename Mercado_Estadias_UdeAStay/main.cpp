@@ -272,13 +272,41 @@ void menuHuesped() {
         switch (opcion) {
         case 1: {
             if (numReservas < MAX_RESERVAS) {
-                Fecha entrada(1, 6, 2025);
-                Fecha pago(30, 5, 2025);
-                Reserva r(1001 + numReservas, "ALOJ001", "123456789", entrada, 2, "TCredito", pago, 300000, "Reserva automatica");
+                char codAlojamiento[10], docHuesped[20], metodo[10], anotacion[1001];
+                int diaEntrada, mesEntrada, anioEntrada, noches;
+                int diaPago, mesPago, anioPago;
+                float monto;
+
+                std::cout << "Ingrese codigo del alojamiento: ";
+                std::cin >> codAlojamiento;
+
+                std::cout << "Ingrese documento del huesped: ";
+                std::cin >> docHuesped;
+
+                std::cout << "Ingrese fecha de entrada (dd mm aaaa): ";
+                std::cin >> diaEntrada >> mesEntrada >> anioEntrada;
+                Fecha entrada(diaEntrada, mesEntrada, anioEntrada);
+
+                std::cout << "Ingrese cantidad de noches: ";
+                std::cin >> noches;
+
+                std::cout << "Ingrese metodo de pago: ";
+                std::cin >> metodo;
+
+                std::cout << "Ingrese fecha de pago (dd mm aaaa): ";
+                std::cin >> diaPago >> mesPago >> anioPago;
+                Fecha pago(diaPago, mesPago, anioPago);
+
+                std::cout << "Ingrese monto total: ";
+                std::cin >> monto;
+
+                std::cin.ignore(); // Limpiar buffer
+                std::cout << "Ingrese anotacion: ";
+                std::cin.getline(anotacion, 1000);
+
+                Reserva r(1001 + numReservas, codAlojamiento, docHuesped, entrada, noches, metodo, pago, monto, anotacion);
                 reservas[numReservas++] = r;
                 std::cout << "Reserva creada.\n";
-            } else {
-                std::cout << "Limite de reservas alcanzado.\n";
             }
             break;
         }
