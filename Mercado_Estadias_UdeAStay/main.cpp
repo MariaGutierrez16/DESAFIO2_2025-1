@@ -2,9 +2,21 @@
 #include <fstream>
 #include <cstring>
 #include "UdeAStay.h"
+#include <sstream>
 
 #define MAX_RESERVAS 100
 #define MAX_ALOJAMIENTOS 100
+#define MAX_HUESPEDES 100
+#define MAX_ANFITRIONES 100
+
+Reserva reservas[MAX_RESERVAS];
+Alojamiento alojamientos[MAX_ALOJAMIENTOS];
+Huesped huespedes[MAX_HUESPEDES];
+Anfitrion anfitriones[MAX_ANFITRIONES];
+int numReservas = 0;
+int numAlojamientos = 0;
+int numHuespedes = 0;
+int numAnfitriones = 0;
 
 // ================= Clase Fecha =================
 Fecha::Fecha() : dia(1), mes(1), anio(2000) {}
@@ -233,28 +245,212 @@ int Reserva::getCodigo() const { return codigo; }
 
 
 
-Reserva reservas[MAX_RESERVAS];
-Alojamiento alojamientos[MAX_ALOJAMIENTOS];
-int numReservas = 0;
-int numAlojamientos = 0;
-
 void guardarReservasEnArchivo(const char* nombreArchivo) {
     std::ofstream archivo(nombreArchivo);
-    for (int i = 0; i < numReservas; ++i) {
-        archivo << reservas[i].getCodigo() << ","
-                << reservas[i].getCodigoAlojamiento() << ","
-                << reservas[i].getDocumentoHuesped() << ","
-                << reservas[i].getFechaEntrada().getDia() << "/"
-                << reservas[i].getFechaEntrada().getMes() << "/"
-                << reservas[i].getFechaEntrada().getAnio() << ","
-                << reservas[i].getCantidadNoches() << ","
-                << "TCredito" << ","  // simplificado
-                << reservas[i].getFechaEntrada().getDia() << "/"
-                << reservas[i].getFechaEntrada().getMes() << "/"
-                << reservas[i].getFechaEntrada().getAnio() << ","
-                << "450000" << ","
-                << "Anotacion ejemplo" << "\n";
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo para guardar reservas.\n";
+        return;
     }
+
+    for (int i = 0; i < numReservas; ++i) {
+        const Reserva& r = reservas[i];
+        archivo << r.getCodigo() << ","
+                << r.getCodigoAlojamiento() << ","
+                << r.getDocumentoHuesped() << ","
+                << r.getFechaEntrada().getDia() << "/"
+                << r.getFechaEntrada().getMes() << "/"
+                << r.getFechaEntrada().getAnio() << ","
+                << r.getCantidadNoches() << ","
+                << "TCredito" << ","  // Simulado
+                << r.getFechaEntrada().getDia() << "/"
+                << r.getFechaEntrada().getMes() << "/"
+                << r.getFechaEntrada().getAnio() << ","
+                << "450000" << ","   // Simulado
+                << "Anotacion ejemplo"
+                << "\n";
+    }
+
+    archivo.close();
+}
+
+void cargarReservasDesdeArchivo(const char* nombreArchivo) {
+    std::ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo de reservas.\n";
+        return;
+    }
+
+    numReservas = 0;
+    std::string linea;
+    while (std::getline(archivo, linea) && numReservas < MAX_RESERVAS) {
+        std::stringstream ss(linea);
+        std::string token;
+
+        int codigo, noches;
+        char codAloj[10], docHuesped[20], metodoPago[10], anotacion[1001];
+        int diaEntrada, mesEntrada, anioEntrada;
+        int diaPago, mesPago, anioPago;
+        float monto;
+
+        std::getline(ss, token, ','); codigo = std::stoi(token);
+        std::getline(ss, token, ','); std::strncpy(codAloj, token.c_str(), 9);
+        std::getline(ss, token, ','); std::strncpy(docHuesped, token.c_str(), 19);
+
+        std::getline(ss, token, '/'); diaEntrada = std::stoi(token);
+        std::getline(ss, token, '/'); mesEntrada = std::stoi(token);
+        std::getline(ss, token, ','); anioEntrada = std::stoi(token);
+
+        std::getline(ss, token, ','); noches = std::stoi(token);
+        std::getline(ss, token, ','); std::strncpy(metodoPago, token.c_str(), 9);
+
+        std::getline(ss, token, '/'); diaPago = std::stoi(token);
+        std::getline(ss, token, '/'); mesPago = std::stoi(token);
+        std::getline(ss, token, ','); anioPago = std::stoi(token);
+
+        std::getline(ss, token, ','); monto = std::stof(token);
+        std::getline(ss, token); std::strncpy(anotacion, token.c_str(), 1000);
+
+        Fecha entrada(diaEntrada, mesEntrada, anioEntrada);
+        Fecha pago(diaPago, mesPago, anioPago);
+        Reserva r(codigo, codAloj, docHuesped, entrada, noches, metodoPago, pago, monto, anotacion);
+        reservas[numReservas++] = r;
+    }
+
+    archivo.close();
+}
+void guardarAlojamientosEnArchivo(const char* nombreArchivo) {
+    std::ofstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo para guardar alojamientos.\n";
+        return;
+    }
+
+    for (int i = 0; i < numAlojamientos; ++i) {
+        const Alojamiento& a = alojamientos[i];
+        archivo << a.getCodigo() << ","
+                << a.getMunicipio() << ","
+                << a.getDocumentoAnfitrion() << ","
+                << a.getPrecioNoche()
+                << "\n";
+    }
+
+    archivo.close();
+}
+
+void cargarAlojamientosDesdeArchivo(const char* nombreArchivo) {
+    std::ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo de alojamientos.\n";
+        return;
+    }
+
+    numAlojamientos = 0;
+    std::string linea;
+    while (std::getline(archivo, linea) && numAlojamientos < MAX_ALOJAMIENTOS) {
+        std::stringstream ss(linea);
+        std::string token;
+        char cod[10], municipio[50], docAnf[20];
+        float precio;
+
+        std::getline(ss, token, ','); std::strncpy(cod, token.c_str(), 9);
+        std::getline(ss, token, ','); std::strncpy(municipio, token.c_str(), 49);
+        std::getline(ss, token, ','); std::strncpy(docAnf, token.c_str(), 19);
+        std::getline(ss, token); precio = std::stof(token);
+
+        Alojamiento a(cod, "Nombre", "Tipo", "Direccion", municipio, "Departamento", precio, docAnf);
+        alojamientos[numAlojamientos++] = a;
+    }
+
+    archivo.close();
+}
+void guardarHuespedesEnArchivo(const char* nombreArchivo) {
+    std::ofstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo para guardar huespedes.\n";
+        return;
+    }
+
+    for (int i = 0; i < numHuespedes; ++i) {
+        archivo << huespedes[i].getDocumento() << ","
+                << huespedes[i].getAntiguedad() << ","
+                << huespedes[i].getPuntuacion()
+                << "\n";
+    }
+
+    archivo.close();
+}
+
+void cargarHuespedesDesdeArchivo(const char* nombreArchivo) {
+    std::ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo de huespedes.\n";
+        return;
+    }
+
+    numHuespedes = 0;
+    std::string linea;
+    while (std::getline(archivo, linea) && numHuespedes < MAX_HUESPEDES) {
+        std::stringstream ss(linea);
+        std::string token;
+        char doc[20];
+        int ant;
+        float punt;
+
+        std::getline(ss, token, ','); std::strncpy(doc, token.c_str(), 19);
+        std::getline(ss, token, ','); ant = std::stoi(token);
+        std::getline(ss, token); punt = std::stof(token);
+
+        Huesped h;
+        h.setDocumento(doc);
+        h.setAntiguedad(ant);
+        h.setPuntuacion(punt);
+        huespedes[numHuespedes++] = h;
+    }
+
+    archivo.close();
+}
+
+void guardarAnfitrionesEnArchivo(const char* nombreArchivo) {
+    std::ofstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo para guardar anfitriones.\n";
+        return;
+    }
+
+    for (int i = 0; i < numAnfitriones; ++i) {
+        archivo << anfitriones[i].getDocumento() << ","
+                << anfitriones[i].getAntiguedad() << ","
+                << anfitriones[i].getPuntuacion()
+                << "\n";
+    }
+
+    archivo.close();
+}
+
+void cargarAnfitrionesDesdeArchivo(const char* nombreArchivo) {
+    std::ifstream archivo(nombreArchivo);
+    if (!archivo.is_open()) {
+        std::cerr << "No se pudo abrir el archivo de anfitriones.\n";
+        return;
+    }
+
+    numAnfitriones = 0;
+    std::string linea;
+    while (std::getline(archivo, linea) && numAnfitriones < MAX_ANFITRIONES) {
+        std::stringstream ss(linea);
+        std::string token;
+        char doc[20];
+        int ant;
+        float punt;
+
+        std::getline(ss, token, ','); std::strncpy(doc, token.c_str(), 19);
+        std::getline(ss, token, ','); ant = std::stoi(token);
+        std::getline(ss, token); punt = std::stof(token);
+
+        Anfitrion a(doc, ant, punt);
+        anfitriones[numAnfitriones++] = a;
+    }
+
     archivo.close();
 }
 
@@ -279,28 +475,21 @@ void menuHuesped() {
 
                 std::cout << "Ingrese codigo del alojamiento: ";
                 std::cin >> codAlojamiento;
-
                 std::cout << "Ingrese documento del huesped: ";
                 std::cin >> docHuesped;
-
                 std::cout << "Ingrese fecha de entrada (dd mm aaaa): ";
                 std::cin >> diaEntrada >> mesEntrada >> anioEntrada;
                 Fecha entrada(diaEntrada, mesEntrada, anioEntrada);
-
                 std::cout << "Ingrese cantidad de noches: ";
                 std::cin >> noches;
-
                 std::cout << "Ingrese metodo de pago: ";
                 std::cin >> metodo;
-
                 std::cout << "Ingrese fecha de pago (dd mm aaaa): ";
                 std::cin >> diaPago >> mesPago >> anioPago;
                 Fecha pago(diaPago, mesPago, anioPago);
-
                 std::cout << "Ingrese monto total: ";
                 std::cin >> monto;
-
-                std::cin.ignore(); // Limpiar buffer
+                std::cin.ignore();
                 std::cout << "Ingrese anotacion: ";
                 std::cin.getline(anotacion, 1000);
 
@@ -388,6 +577,8 @@ void menuAnfitrion() {
 }
 
 int main() {
+    cargarReservasDesdeArchivo("reservas.txt");
+
     int opcion;
     do {
         std::cout << "\n=== UdeAStay ===\n";
@@ -410,8 +601,8 @@ int main() {
             std::cout << "Reservas guardadas en archivo.\n";
             break;
         }
-
     } while (opcion != 4);
 
+    guardarReservasEnArchivo("reservas.txt");
     return 0;
 }
